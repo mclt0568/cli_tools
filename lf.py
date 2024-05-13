@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import os
 import stat
 import pathlib
@@ -60,7 +62,7 @@ def decide_symbol(filename: str, result: os.stat_result) -> str:
     return SYMBOLS["symlink"]
   
   if is_dir(result):
-    return SYMBOLS["dir_hidden" if pure_name[0] == "." else "dir"]
+    return SYMBOLS["dir_hidden" if pure_name and pure_name[0] == "." else "dir"]
   
   if stat.S_ISBLK(result.st_mode):
     return SYMBOLS["block"]
@@ -72,7 +74,7 @@ def decide_symbol(filename: str, result: os.stat_result) -> str:
     return SYMBOLS["special"]
   
   if not stat.S_ISREG(result.st_mode):
-    return SYMBOLS["file_hidden" if pure_name[0] == "." else "file"]
+    return SYMBOLS["file_hidden" if pure_name and pure_name[0] == "." else "file"]
   
   mime = str(magic.from_file(filename, mime=True))
 
@@ -84,7 +86,7 @@ def decide_symbol(filename: str, result: os.stat_result) -> str:
     case "application/octet-stream":
       return SYMBOLS["binary"]
   
-  return SYMBOLS["file_hidden" if pure_name[0] == "." else "file"]
+  return SYMBOLS["file_hidden" if pure_name and pure_name[0] == "." else "file"]
 
 
 def get_permission(result: os.stat_result) -> str:
@@ -159,7 +161,7 @@ def main():
     dirs = list(filter(lambda x: x[0] != ".", dirs))
 
   if args.all:
-    entry = form_entry(str(base_path/"."))
+    entry = form_entry(str(base_path))
     print(entry["permissions"] + "  " + f"{SYMBOLS['dir_hidden']} .{RESET}/")
     entry = form_entry(str(base_path/".."))
     print(entry["permissions"] + "  " + f"{SYMBOLS['dir_hidden']} ..{RESET}/")
